@@ -1,0 +1,67 @@
+---
+title: "stl_lead_inequity.qmd"
+format: html
+editor: visual
+---
+
+```{r}
+# Attach the tidyverse and janitor packages in a new code chunk
+library(tidyverse)
+library(janitor)
+library(ggplot2)
+
+```
+
+```{r}
+# Read in the stl_blood_lead.csv data as stl_lead and use janitor::clean_names to convert all variable names to lower snake case
+stl_lead <-read_csv(here::here("data","stl_blood_lead.csv"))
+                    
+stl_lead <- stl_lead %>% clean_names()
+
+# OR
+
+stl_lead <-read_csv(here::here("data","stl_blood_lead.csv")) |> clean_names()
+                    
+
+# Do some basic exploration of the dataset (e.g. using summary, data visualizations and summary statistics)
+names(stl_lead)
+dim(stl_lead)
+skimr::skim(stl_lead)
+view(stl_lead)
+
+
+```
+
+In a new code chunk, from stl_blood_lead create a new data frame called stl_lead_prop that has one additional column called prop_white that returns the percent of each census tract identifying as white (variable white in the dataset divided by variable totalPop, times 100). You may need to do some Googling. Hint: dplyr::mutate(new_col = col_a / col_b) will create a new column new_col that contains the value of col_a / col_b
+
+```{r}
+# Create Data Frame
+stl_lead_prop <- stl_lead %>% dplyr::mutate(prop_white = (white / total_pop) * 100) 
+
+view(stl_lead_prop)
+dim(stl_lead_prop)
+```
+
+```{r}
+stl_lead_plot <- ggplot(stl_lead_prop, aes(x = pct_elevated, y = white)) +
+  geom_jitter(aes(size = 10, alpha = 20, color = "pct_elevated"),show.legend = FALSE) + theme_minimal() +
+    labs(title = "High Blood Pressure by % of white people",
+       y = "White",
+       x = "Elevated Blood Pressure")
+    
+
+stl_lead_plot
+
+ggsave(here::here("figs", "stl_lead_plot.png"), height = 6, width = 5)
+```
+
+```{r}
+stl_lead_hist_plot <- ggplot(stl_lead_prop, aes(x = pct_elevated, bins = 50)) +
+  geom_histogram(aes(size = 10, alpha = 20, color = "pct_elevated"),
+                 show.legend = FALSE) + 
+  theme_minimal()
+
+stl_lead_hist_plot
+
+ggsave(here::here("figs", "stl_lead_hist_plot..jpg"))
+```
